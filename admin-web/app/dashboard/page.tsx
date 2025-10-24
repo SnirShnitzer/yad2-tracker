@@ -2,6 +2,8 @@ import { getAdsStats } from '@/lib/db'
 import { StatsCard } from '@/components/StatsCard'
 import { ActivityFeed } from '@/components/ActivityFeed'
 
+export const dynamic = 'force-dynamic'
+
 export default async function DashboardPage() {
   const stats = await getAdsStats()
 

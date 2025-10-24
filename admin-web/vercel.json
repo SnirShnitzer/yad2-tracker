@@ -1,9 +1,0 @@
-{
-  "buildCommand": "npm run build",
-  "outputDirectory": ".next",
-  "framework": "nextjs",
-  "env": {
-    "DATABASE_URL": "@database-url",
-    "ADMIN_PASSWORD": "@admin-password"
-  }
-}

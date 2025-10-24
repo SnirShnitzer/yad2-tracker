@@ -2,6 +2,8 @@ import { getAdsStats } from '@/lib/db'
 import { StatsChart } from '@/components/StatsChart'
 import { StatsCard } from '@/components/StatsCard'
 
+export const dynamic = 'force-dynamic'
+
 export default async function StatsPage() {
   const stats = await getAdsStats()
 

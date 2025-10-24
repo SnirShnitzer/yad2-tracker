@@ -3,6 +3,8 @@ import { UrlTable } from '@/components/UrlTable'
 import { UrlForm } from '@/components/UrlForm'
 import { Plus } from 'lucide-react'
 
+export const dynamic = 'force-dynamic'
+
 export default async function UrlsPage() {
   const urls = await getAllUrls()
 
