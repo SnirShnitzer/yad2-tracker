@@ -10,7 +10,7 @@ A TypeScript Node.js web scraper that monitors Yad2 rental listings and sends em
 - Tracks seen ads to detect new ones
 - Sends email notifications with new listings
 - Saves progress in JSON file
-- Scheduled execution every 15 minutes
+- Scheduled execution every hour
 
 ## Setup
 
@@ -23,7 +23,18 @@ A TypeScript Node.js web scraper that monitors Yad2 rental listings and sends em
    ```
    GMAIL_USER=your-email@gmail.com
    GMAIL_APP_PASSWORD=your-16-character-app-password
+   EMAIL_RECIPIENTS=recipient1@gmail.com,recipient2@gmail.com
+   SEND_EMAILS=true
    ```
+   
+   **Email Configuration:**
+   - `GMAIL_USER`: Your Gmail address (sender)
+   - `GMAIL_APP_PASSWORD`: Your Gmail app password
+   - `EMAIL_RECIPIENTS`: Comma-separated list of recipients (optional, defaults to GMAIL_USER)
+   - `SEND_EMAILS`: Set to `true`/`1` to enable emails, `false`/`0` to disable (default: `true`)
+   
+   **Database Configuration (Optional):**
+   - `DATABASE_URL`: PostgreSQL connection string for shared storage (see DATABASE_SETUP.md)
 
 3. To get a Gmail App Password:
    - Go to your Google Account settings
@@ -37,7 +48,7 @@ A TypeScript Node.js web scraper that monitors Yad2 rental listings and sends em
 # One-time run
 npm run dev
 
-# Scheduled run (every 15 minutes)
+# Scheduled run (every hour)
 npm run dev:schedule
 ```
 
@@ -46,7 +57,7 @@ npm run dev:schedule
 # One-time run
 npm start
 
-# Scheduled run (every 15 minutes)
+# Scheduled run (every hour)
 npm run schedule
 ```
 
@@ -59,9 +70,9 @@ npm run build
 
 - `npm run build` - Compile TypeScript to JavaScript
 - `npm start` - Build and run once
-- `npm run schedule` - Build and run continuously every 15 minutes
+- `npm run schedule` - Build and run continuously every hour
 - `npm run dev` - Compile and run once (development)
-- `npm run dev:schedule` - Compile and run continuously (development)
+- `npm run dev:schedule` - Compile and run continuously every hour (development)
 
 ## Configuration
 

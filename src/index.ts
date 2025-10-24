@@ -1,7 +1,11 @@
 import cron from 'node-cron';
+import dotenv from 'dotenv';
 import { TrackerService } from './services/tracker.service.js';
 import { Logger } from './utils/logger.js';
 import { CRON_SCHEDULE, TIMEZONE } from './config.js';
+
+// Load environment variables from .env file
+dotenv.config();
 
 // Main execution function
 async function runTracker(): Promise<void> {

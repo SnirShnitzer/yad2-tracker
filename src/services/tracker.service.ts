@@ -3,7 +3,8 @@ import { Logger } from '../utils/logger.js';
 import { ScraperService } from './scraper.service.js';
 import { EmailService } from './email.service.js';
 import { StorageService } from './storage.service.js';
-import { YAD2_URLS, SEEN_ADS_FILE, EMAIL_CONFIG } from '../config.js';
+import { DatabaseStorageService } from './database-storage.service.js';
+import { YAD2_API_URLS, SEEN_ADS_FILE, EMAIL_CONFIG } from '../config.js';
 
 /**
  * Main tracker service that orchestrates the entire process
@@ -26,8 +27,8 @@ export class TrackerService {
         Logger.start('Starting Yad2 tracking...');
         
         try {
-            // Scrape all URLs
-            const allAds = await this.scraperService.scrapeUrls(YAD2_URLS);
+            // Fetch ads from API endpoints with fallback
+            const allAds = await this.scraperService.fetchAdsWithFallback();
             
             // Filter out unwanted ads
             const filteredAds = this.scraperService.filterAds(allAds);
@@ -63,7 +64,7 @@ export class TrackerService {
     private logNewAds(newAds: AdData[]): void {
         Logger.info('New ads:');
         newAds.forEach(ad => {
-            Logger.info(`- ${ad.title} (${ad.price}) - ${ad.link}`);
+            Logger.info(`- ${ad.title} (${ad.price}) - ${ad.address} - ${ad.link}`);
         });
     }
 

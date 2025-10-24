@@ -6,7 +6,7 @@ Deploy your Yad2 Tracker using GitHub Actions for completely free automated sche
 
 - ✅ **Completely FREE** for public repositories
 - ✅ **2,000 minutes/month** for private repos (more than enough)
-- ✅ **Runs every 15 minutes** automatically
+- ✅ **Runs every hour** automatically
 - ✅ **No server management** - GitHub handles everything
 - ✅ **Easy setup** - Just add secrets and push code
 - ✅ **Manual triggers** - Run on-demand for testing
@@ -43,7 +43,7 @@ git push origin master
 3. **Click "Secrets and variables" → "Actions"**
 4. **Click "New repository secret"**
 
-Add these two secrets:
+Add these secrets:
 
 #### Secret 1: GMAIL_USER
 - **Name**: `GMAIL_USER`
@@ -52,6 +52,16 @@ Add these two secrets:
 #### Secret 2: GMAIL_APP_PASSWORD
 - **Name**: `GMAIL_APP_PASSWORD`
 - **Value**: `your-16-character-app-password`
+
+#### Secret 3: DATABASE_URL (Optional)
+- **Name**: `DATABASE_URL`
+- **Value**: `postgresql://user:pass@host:port/db`
+- **Description**: For shared database storage (see DATABASE_SETUP.md)
+
+#### Secret 4: SEND_EMAILS (Optional)
+- **Name**: `SEND_EMAILS`
+- **Value**: `true` or `false`
+- **Description**: Enable/disable email notifications
 
 ### Step 3: Enable GitHub Actions
 
@@ -71,7 +81,7 @@ Add these two secrets:
 ## ⏰ How It Works
 
 ### Automatic Scheduling:
-- **Runs every 15 minutes** (24/7)
+- **Runs every hour** (24/7)
 - **Checks Yad2 listings** automatically
 - **Sends email notifications** when new ads found
 - **Tracks seen ads** to avoid duplicates
@@ -200,7 +210,7 @@ The workflow runs in UTC. To change timezone, add to the workflow:
 ## 🎉 Success!
 
 Once set up, your Yad2 Tracker will:
-- ✅ **Run every 15 minutes** automatically
+- ✅ **Run every hour** automatically
 - ✅ **Send email notifications** for new listings
 - ✅ **Track seen ads** to avoid duplicates
 - ✅ **Run 24/7** without any server management
@@ -217,12 +227,12 @@ Your apartment hunting is now fully automated! 🏠✨
 - ✅ **Unlimited runs** - No restrictions
 
 ### Private Repositories:
-- ✅ **2,000 minutes/month** - More than enough for 15-min intervals
+- ✅ **2,000 minutes/month** - More than enough for hourly intervals
 - ✅ **Unlimited public repos** - Always free
 
 ### Cost Calculation:
-- **15-minute intervals** = 96 runs/day = ~2,880 runs/month
+- **Hourly intervals** = 24 runs/day = ~720 runs/month
 - **Each run** = ~1-2 minutes
-- **Total usage** = ~3,000 minutes/month
-- **Private repo limit** = 2,000 minutes (might need to reduce frequency)
+- **Total usage** = ~1,440 minutes/month
+- **Private repo limit** = 2,000 minutes (plenty of room!)
 - **Public repo** = Unlimited! 🎉

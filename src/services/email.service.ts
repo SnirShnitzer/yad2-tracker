@@ -17,8 +17,21 @@ export class EmailService {
      * Initialize email transporter
      */
     private initializeTransporter(): void {
+        // Debug environment variables
+        Logger.debug(`GMAIL_USER: ${process.env.GMAIL_USER ? 'Set' : 'Not set'}`);
+        Logger.debug(`GMAIL_APP_PASSWORD: ${process.env.GMAIL_APP_PASSWORD ? 'Set' : 'Not set'}`);
+        
         if (validateEmailConfig()) {
-            this.transporter = nodemailer.createTransport(this.emailConfig);
+            // Create a fresh config with current environment variables
+            const currentConfig = {
+                service: 'gmail',
+                auth: {
+                    user: process.env.GMAIL_USER,
+                    pass: process.env.GMAIL_APP_PASSWORD
+                }
+            };
+            
+            this.transporter = nodemailer.createTransport(currentConfig);
             Logger.success('Email transporter initialized');
         } else {
             Logger.warning('Email configuration missing. Please set GMAIL_USER and GMAIL_APP_PASSWORD environment variables');
@@ -34,23 +47,32 @@ export class EmailService {
             return;
         }
 
+        // Check if email sending is disabled via environment variable
+        if (process.env.SEND_EMAILS === 'false' || process.env.SEND_EMAILS === '0') {
+            Logger.info(`📧 שליחת אימייל מבוטלת (SEND_EMAILS=false) - היו נשלחים ${newAds.length} דירות חדשות`);
+            return;
+        }
+
         if (!this.transporter) {
             Logger.error('Email configuration missing. Please set GMAIL_USER and GMAIL_APP_PASSWORD environment variables');
             return;
         }
 
         try {
-            const subject = `🏠 ${newAds.length} New Yad2 Rental Listings Found!`;
+            const subject = `🏠 ${newAds.length} דירות חדשות נמצאו ביד2!`;
             const htmlBody = this.generateEmailBody(newAds);
 
+            // Get recipients from environment variable or default to GMAIL_USER
+            const recipients = process.env.EMAIL_RECIPIENTS || process.env.GMAIL_USER!;
+            
             const mailOptions: MailOptions = {
                 from: process.env.GMAIL_USER!,
-                to: process.env.GMAIL_USER!, // Send to yourself
+                to: recipients, // Send to specified recipients
                 subject: subject,
                 html: htmlBody
             };
 
-            await this.transporter.sendMail(mailOptions);
+            await this.transporter!.sendMail(mailOptions);
             Logger.email('Email sent');
         } catch (error) {
             Logger.error('Error sending email:', error as Error);
@@ -58,26 +80,26 @@ export class EmailService {
     }
 
     /**
-     * Generate HTML email body
+     * Generate HTML email body in Hebrew
      */
     private generateEmailBody(newAds: AdData[]): string {
         let htmlBody = `
-            <h2>New Rental Listings Found</h2>
-            <p>Found ${newAds.length} new rental listings that match your criteria:</p>
+            <h2>דירות חדשות נמצאו</h2>
+            <p>נמצאו ${newAds.length} דירות חדשות התואמות לקריטריונים שלך:</p>
             <ul>
         `;
 
-        newAds.forEach(ad => {
-            htmlBody += `
-                <li>
-                    <strong><a href="${ad.link}">${ad.title}</a></strong><br>
-                    <strong>Price:</strong> ${ad.price}<br>
-                    <strong>Location:</strong> ${ad.location}<br>
-                    <strong>Description:</strong> ${ad.description}<br>
-                    <hr>
-                </li>
-            `;
-        });
+            newAds.forEach(ad => {
+                htmlBody += `
+                    <li>
+                        <strong><a href="${ad.link}">${ad.title}</a></strong><br>
+                        <strong>מחיר:</strong> ${ad.price}<br>
+                        <strong>כתובת:</strong> ${ad.address}<br>
+                        <strong>פרטי לקוח:</strong> ${ad.description || 'פרטי'}<br>
+                        <hr>
+                    </li>
+                `;
+            });
 
         htmlBody += '</ul>';
         return htmlBody;
