@@ -17,6 +17,8 @@ on:
   # Run on push to main branch (for testing)
   push:
     branches: [ main, master ]
+    paths-ignore:
+      - 'admin-web/**'
 
 jobs:
   track-listings:
@@ -34,12 +36,15 @@ jobs:
         
     - name: Install dependencies
       run: |
+        cd tracker-service
         npm ci
         # Fix for undici compatibility issues
         npm install --save-dev @types/node@18
       
     - name: Build TypeScript
-      run: npm run build
+      run: |
+        cd tracker-service
+        npm run build
       
     - name: Run Yad2 Tracker
       env:
@@ -51,6 +56,7 @@ jobs:
         TEST_MODE: ${{ github.event.inputs.test_mode || 'false' }}
         NODE_OPTIONS: --no-experimental-fetch
       run: |
+        cd tracker-service
         if [ "$TEST_MODE" = "true" ]; then
           echo "🧪 Running in test mode - no emails will be sent"
           node dist/index.js
@@ -65,5 +71,5 @@ jobs:
       with:
         name: error-logs
         path: |
-          *.log
-          seen_ads.json
+          tracker-service/*.log
+          tracker-service/seen_ads.json
