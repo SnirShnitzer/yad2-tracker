@@ -3,11 +3,40 @@ import { AdData, Yad2ApiResponse, Yad2Marker } from '../types.js';
 import { Logger } from '../utils/logger.js';
 import { generateAdId, removeDuplicateAds, containsFilterWords } from '../utils/helpers.js';
 import { REQUEST_HEADERS, FILTER_WORDS, YAD2_API_URLS } from '../config.js';
+import { DatabaseService } from './database.service.js';
 
 /**
  * Service for fetching Yad2 data from JSON API
  */
 export class ScraperService {
+    private databaseService: DatabaseService | null = null;
+
+    constructor() {
+        if (process.env.DATABASE_URL) {
+            this.databaseService = new DatabaseService();
+        }
+    }
+
+    /**
+     * Get URLs from database or fallback to config
+     */
+    public async getUrls(): Promise<string[]> {
+        if (this.databaseService) {
+            try {
+                const dbUrls = await this.databaseService.getUrls();
+                if (dbUrls.length > 0) {
+                    Logger.info(`Using ${dbUrls.length} URLs from database`);
+                    return dbUrls;
+                }
+            } catch (error) {
+                Logger.error('Error getting URLs from database, falling back to config:', error as Error);
+            }
+        }
+        
+        Logger.info(`Using ${YAD2_API_URLS.length} URLs from config`);
+        return YAD2_API_URLS;
+    }
+
     /**
      * Fetch JSON data from Yad2 API
      */
@@ -134,7 +163,8 @@ export class ScraperService {
      * Fetch ads from the working API endpoints
      */
     public async fetchAdsWithFallback(): Promise<AdData[]> {
-        const ads = await this.fetchAdsFromApis(YAD2_API_URLS);
+        const urls = await this.getUrls();
+        const ads = await this.fetchAdsFromApis(urls);
         
         if (ads.length === 0) {
             Logger.warning('No listings found. This might be normal if no listings match your criteria.');

@@ -36,6 +36,18 @@ export class DatabaseService {
                 )
             `);
 
+            // Create urls table for storing Yad2 URLs
+            await client.query(`
+                CREATE TABLE IF NOT EXISTS urls (
+                    id SERIAL PRIMARY KEY,
+                    url TEXT NOT NULL UNIQUE,
+                    name TEXT,
+                    is_active BOOLEAN DEFAULT true,
+                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                )
+            `);
+
             // Create index for faster lookups
             await client.query(`
                 CREATE INDEX IF NOT EXISTS idx_seen_ads_id ON seen_ads(id)
@@ -142,6 +154,78 @@ export class DatabaseService {
             Logger.info(`Cleaned up ads older than ${daysToKeep} days`);
         } catch (error) {
             Logger.error('Error cleaning up old ads:', error as Error);
+        }
+    }
+
+    /**
+     * Get all active URLs from database
+     */
+    public async getUrls(): Promise<string[]> {
+        try {
+            const client = await this.pool.connect();
+            const result = await client.query('SELECT url FROM urls WHERE is_active = true ORDER BY id');
+            client.release();
+            
+            return result.rows.map(row => row.url);
+        } catch (error) {
+            Logger.error('Error getting URLs from database:', error as Error);
+            return [];
+        }
+    }
+
+    /**
+     * Add a new URL to the database
+     */
+    public async addUrl(url: string, name?: string): Promise<void> {
+        try {
+            const client = await this.pool.connect();
+            
+            await client.query(
+                'INSERT INTO urls (url, name) VALUES ($1, $2) ON CONFLICT (url) DO NOTHING',
+                [url, name || null]
+            );
+            
+            client.release();
+            Logger.success(`Added URL to database: ${url}`);
+        } catch (error) {
+            Logger.error('Error adding URL to database:', error as Error);
+            throw error;
+        }
+    }
+
+    /**
+     * Update URL status (activate/deactivate)
+     */
+    public async updateUrlStatus(url: string, isActive: boolean): Promise<void> {
+        try {
+            const client = await this.pool.connect();
+            
+            await client.query(
+                'UPDATE urls SET is_active = $1, updated_at = CURRENT_TIMESTAMP WHERE url = $2',
+                [isActive, url]
+            );
+            
+            client.release();
+            Logger.success(`Updated URL status: ${url} -> ${isActive ? 'active' : 'inactive'}`);
+        } catch (error) {
+            Logger.error('Error updating URL status:', error as Error);
+            throw error;
+        }
+    }
+
+    /**
+     * Get URLs with metadata
+     */
+    public async getUrlsWithMetadata(): Promise<Array<{url: string, name: string | null, is_active: boolean}>> {
+        try {
+            const client = await this.pool.connect();
+            const result = await client.query('SELECT url, name, is_active FROM urls ORDER BY id');
+            client.release();
+            
+            return result.rows;
+        } catch (error) {
+            Logger.error('Error getting URLs with metadata:', error as Error);
+            return [];
         }
     }
 

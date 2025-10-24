@@ -32,7 +32,7 @@ export const REQUEST_HEADERS = {
 };
 
 // Cron schedule (every 15 minutes)
-export const CRON_SCHEDULE = '*/15 * * * *';
+export const CRON_SCHEDULE = '0 * * * *';
 
 // Timezone for scheduling
 export const TIMEZONE = 'Asia/Jerusalem';

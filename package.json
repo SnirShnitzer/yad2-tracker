@@ -10,6 +10,8 @@
     "schedule": "npm run build && node dist/index.js --schedule",
     "dev": "tsc && node dist/index.js",
     "dev:schedule": "tsc && node dist/index.js --schedule",
+    "manage-urls": "tsc && node dist/scripts/manage-urls.js",
+    "test-database": "tsc && node dist/scripts/test-database.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
