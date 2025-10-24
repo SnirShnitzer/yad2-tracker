@@ -1,0 +1,63 @@
+name: Yad2 Tracker
+
+on:
+  # Run every 15 minutes
+  schedule:
+    - cron: '*/15 * * * *'
+  
+  # Allow manual triggering
+  workflow_dispatch:
+    inputs:
+      test_mode:
+        description: 'Run in test mode (no emails)'
+        required: false
+        default: 'false'
+        type: boolean
+
+  # Run on push to main branch (for testing)
+  push:
+    branches: [ main, master ]
+
+jobs:
+  track-listings:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        cache: 'npm'
+        
+    - name: Install dependencies
+      run: npm ci
+      
+    - name: Build TypeScript
+      run: npm run build
+      
+    - name: Run Yad2 Tracker
+      env:
+        GMAIL_USER: ${{ secrets.GMAIL_USER }}
+        GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
+        NODE_ENV: production
+        TEST_MODE: ${{ github.event.inputs.test_mode || 'false' }}
+      run: |
+        if [ "$TEST_MODE" = "true" ]; then
+          echo "🧪 Running in test mode - no emails will be sent"
+          node dist/index.js
+        else
+          echo "🚀 Running Yad2 Tracker with email notifications"
+          node dist/index.js
+        fi
+        
+    - name: Upload logs (if any errors)
+      if: failure()
+      uses: actions/upload-artifact@v4
+      with:
+        name: error-logs
+        path: |
+          *.log
+          seen_ads.json

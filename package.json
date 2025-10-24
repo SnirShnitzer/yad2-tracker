@@ -3,8 +3,13 @@
   "version": "1.0.0",
   "description": "",
   "type": "module",
-  "main": "index.js",
+  "main": "dist/index.js",
   "scripts": {
+    "build": "tsc",
+    "start": "npm run build && node dist/index.js",
+    "schedule": "npm run build && node dist/index.js --schedule",
+    "dev": "tsc && node dist/index.js",
+    "dev:schedule": "tsc && node dist/index.js --schedule",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
@@ -14,6 +19,14 @@
     "axios": "^1.12.2",
     "cheerio": "^1.1.2",
     "fs": "^0.0.1-security",
+    "node-cron": "^4.2.1",
     "nodemailer": "^7.0.10"
+  },
+  "devDependencies": {
+    "@types/cheerio": "^0.22.35",
+    "@types/node": "^24.9.1",
+    "@types/node-cron": "^3.0.11",
+    "@types/nodemailer": "^7.0.3",
+    "typescript": "^5.9.3"
   }
 }
