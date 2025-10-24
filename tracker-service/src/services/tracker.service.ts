@@ -60,8 +60,8 @@ export class TrackerService {
                 Logger.info('No new ads found');
             }
 
-            // Update seen ads in database
-            await this.databaseStorageService.addSeenAds(newAds);
+            // Update seen ads in database (add all filtered ads, not just new ones)
+            await this.databaseStorageService.addSeenAds(filteredAds);
 
             Logger.success('Tracking completed!');
         } catch (error) {
