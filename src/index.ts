@@ -10,6 +10,7 @@ dotenv.config();
 // Main execution function
 async function runTracker(): Promise<void> {
     const tracker = new TrackerService();
+    await tracker.initialize();
     await tracker.trackListings();
 }
 

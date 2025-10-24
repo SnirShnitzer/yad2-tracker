@@ -13,11 +13,24 @@ export class TrackerService {
     private scraperService: ScraperService;
     private emailService: EmailService;
     private storageService: StorageService;
+    private databaseStorageService: DatabaseStorageService;
 
     constructor() {
         this.scraperService = new ScraperService();
         this.emailService = new EmailService(EMAIL_CONFIG);
         this.storageService = new StorageService(SEEN_ADS_FILE);
+        this.databaseStorageService = new DatabaseStorageService();
+    }
+
+    /**
+     * Initialize the tracker service
+     */
+    public async initialize(): Promise<void> {
+        // Initialize database storage if available
+        await this.databaseStorageService.initialize();
+        
+        const stats = await this.databaseStorageService.getStats();
+        Logger.info(`Loaded ${stats.seenAdsCount} previously seen ads`);
     }
 
     /**
@@ -34,8 +47,8 @@ export class TrackerService {
             const filteredAds = this.scraperService.filterAds(allAds);
             Logger.info(`After filtering: ${filteredAds.length} ads`);
 
-            // Find new ads
-            const newAds = this.storageService.findNewAds(filteredAds);
+            // Find new ads using database storage
+            const newAds = this.databaseStorageService.findNewAds(filteredAds);
 
             if (newAds.length > 0) {
                 Logger.success(`Found ${newAds.length} new ads`);
@@ -47,9 +60,8 @@ export class TrackerService {
                 Logger.info('No new ads found');
             }
 
-            // Update seen ads
-            this.storageService.addSeenAds(newAds);
-            this.storageService.saveSeenAds();
+            // Update seen ads in database
+            await this.databaseStorageService.addSeenAds(newAds);
 
             Logger.success('Tracking completed!');
         } catch (error) {
