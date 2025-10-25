@@ -97,6 +97,14 @@ export interface Stats {
   adsThisWeek: number
 }
 
+export interface Settings {
+  id: number
+  key: string
+  value: string
+  created_at: string
+  updated_at: string
+}
+
 // URL Management
 export async function getAllUrls(): Promise<Url[]> {
   const client = await pool.connect()
@@ -238,6 +246,65 @@ export async function clearOldAds(daysToKeep: number = 30): Promise<number> {
       [daysToKeep]
     )
     return result.rowCount || 0
+  } finally {
+    client.release()
+  }
+}
+
+// Settings Management
+export async function getSettings(): Promise<Record<string, string>> {
+  const client = await pool.connect()
+  try {
+    const result = await client.query('SELECT key, value FROM settings ORDER BY key')
+    const settings: Record<string, string> = {}
+    result.rows.forEach(row => {
+      settings[row.key] = row.value
+    })
+    return settings
+  } finally {
+    client.release()
+  }
+}
+
+export async function updateSetting(key: string, value: string): Promise<void> {
+  const client = await pool.connect()
+  try {
+    await client.query(
+      'INSERT INTO settings (key, value) VALUES ($1, $2) ON CONFLICT (key) DO UPDATE SET value = $2, updated_at = CURRENT_TIMESTAMP',
+      [key, value]
+    )
+  } finally {
+    client.release()
+  }
+}
+
+export async function initializeSettings(): Promise<void> {
+  const client = await pool.connect()
+  try {
+    // Create settings table if it doesn't exist
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS settings (
+        id SERIAL PRIMARY KEY,
+        key VARCHAR(255) UNIQUE NOT NULL,
+        value TEXT NOT NULL,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      )
+    `)
+    
+    // Initialize default settings if they don't exist
+    const defaultSettings = [
+      { key: 'send_emails', value: 'true' },
+      { key: 'email_recipients', value: '' },
+      { key: 'admin_password', value: process.env.ADMIN_PASSWORD || 'admin123' }
+    ]
+    
+    for (const setting of defaultSettings) {
+      await client.query(
+        'INSERT INTO settings (key, value) VALUES ($1, $2) ON CONFLICT (key) DO NOTHING',
+        [setting.key, setting.value]
+      )
+    }
   } finally {
     client.release()
   }

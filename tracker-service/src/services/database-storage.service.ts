@@ -98,6 +98,13 @@ export class DatabaseStorageService {
     }
 
     /**
+     * Get the database service instance
+     */
+    public getDatabaseService(): DatabaseService | null {
+        return this.databaseService;
+    }
+
+    /**
      * Close database connection
      */
     public async close(): Promise<void> {

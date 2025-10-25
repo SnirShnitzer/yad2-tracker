@@ -71,6 +71,13 @@ export class DatabaseService {
     }
 
     /**
+     * Get a database client from the pool
+     */
+    public async getClient() {
+        return await this.pool.connect();
+    }
+
+    /**
      * Test database connection
      */
     public async testConnection(): Promise<boolean> {

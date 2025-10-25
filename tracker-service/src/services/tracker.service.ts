@@ -17,9 +17,10 @@ export class TrackerService {
 
     constructor() {
         this.scraperService = new ScraperService();
-        this.emailService = new EmailService(EMAIL_CONFIG);
         this.storageService = new StorageService(SEEN_ADS_FILE);
         this.databaseStorageService = new DatabaseStorageService();
+        // Email service will be initialized after database is available
+        this.emailService = new EmailService(EMAIL_CONFIG);
     }
 
     /**
@@ -41,6 +42,14 @@ export class TrackerService {
         // If database is required but not available, fail
         if (requireDatabase && !this.databaseStorageService.isDatabaseAvailable()) {
             throw new Error('Database connection is required but not available. Check your DATABASE_URL configuration.');
+        }
+        
+        // Re-initialize email service with database service if available
+        if (this.databaseStorageService.isDatabaseAvailable()) {
+            const databaseService = this.databaseStorageService.getDatabaseService();
+            if (databaseService) {
+                this.emailService = new EmailService(EMAIL_CONFIG, databaseService);
+            }
         }
         
         const stats = await this.databaseStorageService.getStats();

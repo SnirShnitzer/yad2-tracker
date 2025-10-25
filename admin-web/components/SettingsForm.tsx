@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Save, Mail, Bell } from 'lucide-react'
 
 export function SettingsForm() {
@@ -11,6 +11,29 @@ export function SettingsForm() {
   })
   const [loading, setLoading] = useState(false)
   const [message, setMessage] = useState('')
+  const [initialLoading, setInitialLoading] = useState(true)
+
+  useEffect(() => {
+    fetchSettings()
+  }, [])
+
+  const fetchSettings = async () => {
+    try {
+      const response = await fetch('/api/settings')
+      if (response.ok) {
+        const settings = await response.json()
+        setFormData({
+          sendEmails: settings.send_emails === 'true',
+          emailRecipients: settings.email_recipients || '',
+          adminPassword: '',
+        })
+      }
+    } catch (error) {
+      console.error('Error fetching settings:', error)
+    } finally {
+      setInitialLoading(false)
+    }
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -18,14 +41,36 @@ export function SettingsForm() {
     setMessage('')
 
     try {
-      // In a real app, you'd make API calls to update settings
-      await new Promise(resolve => setTimeout(resolve, 1000)) // Simulate API call
-      setMessage('Settings saved successfully!')
+      const response = await fetch('/api/settings', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(formData),
+      })
+
+      if (response.ok) {
+        setMessage('Settings saved successfully!')
+        setFormData(prev => ({ ...prev, adminPassword: '' })) // Clear password field
+      } else {
+        const data = await response.json()
+        setMessage(data.error || 'Failed to save settings')
+      }
     } catch (error) {
       setMessage('Failed to save settings')
     } finally {
       setLoading(false)
     }
+  }
+
+  if (initialLoading) {
+    return (
+      <div className="card">
+        <div className="flex items-center justify-center h-32">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+        </div>
+      </div>
+    )
   }
 
   return (
