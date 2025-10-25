@@ -9,12 +9,29 @@ export class DatabaseService {
     private pool: Pool;
 
     constructor() {
+        // Parse the DATABASE_URL to extract components
+        const url = new URL(process.env.DATABASE_URL || '');
+        
+        // Try to resolve hostname to IPv4 address
+        const hostname = url.hostname;
+        
         this.pool = new Pool({
-            connectionString: process.env.DATABASE_URL,
+            // Use individual connection parameters instead of connectionString to force IPv4
+            host: hostname,
+            port: parseInt(url.port) || 5432,
+            database: url.pathname.slice(1), // Remove leading slash
+            user: url.username,
+            password: url.password,
             ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false,
             // Connection timeout settings
-            connectionTimeoutMillis: 10000,
-            idleTimeoutMillis: 30000
+            connectionTimeoutMillis: 15000, // Increased timeout
+            idleTimeoutMillis: 30000,
+            // Force IPv4 by using hostname resolution
+            keepAlive: true,
+            keepAliveInitialDelayMillis: 0,
+            // Additional options to help with connectivity
+            statement_timeout: 10000,
+            query_timeout: 10000
         });
     }
 

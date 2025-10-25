@@ -63,7 +63,8 @@ jobs:
         SEND_EMAILS: ${{ secrets.SEND_EMAILS || 'true' }}
         NODE_ENV: production
         TEST_MODE: ${{ github.event.inputs.test_mode || 'false' }}
-        NODE_OPTIONS: --no-experimental-fetch
+        # Force IPv4 to avoid GitHub Actions IPv6 connectivity issues
+        NODE_OPTIONS: --no-experimental-fetch --dns-result-order=ipv4first
       run: |
         cd tracker-service
         if [ "$TEST_MODE" = "true" ]; then
