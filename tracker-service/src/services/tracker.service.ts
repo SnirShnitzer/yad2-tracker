@@ -26,8 +26,12 @@ export class TrackerService {
      * Initialize the tracker service
      */
     public async initialize(): Promise<void> {
+        // In production, require database by default unless explicitly disabled
+        const requireDatabase = process.env.REQUIRE_DATABASE === 'true' || 
+                               (process.env.NODE_ENV === 'production' && process.env.REQUIRE_DATABASE !== 'false');
+        
         // Check if DATABASE_URL is required but not available
-        if (process.env.REQUIRE_DATABASE === 'true' && !process.env.DATABASE_URL) {
+        if (requireDatabase && !process.env.DATABASE_URL) {
             throw new Error('DATABASE_URL is required but not provided. Set REQUIRE_DATABASE=false to allow fallback to file storage.');
         }
 
@@ -35,7 +39,7 @@ export class TrackerService {
         await this.databaseStorageService.initialize();
         
         // If database is required but not available, fail
-        if (process.env.REQUIRE_DATABASE === 'true' && !this.databaseStorageService.isDatabaseAvailable()) {
+        if (requireDatabase && !this.databaseStorageService.isDatabaseAvailable()) {
             throw new Error('Database connection is required but not available. Check your DATABASE_URL configuration.');
         }
         
