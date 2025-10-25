@@ -1,6 +1,7 @@
 # Tracker service
 tracker-service/node_modules/
 tracker-service/.env
+tracker-service/.env.local
 tracker-service/*.log
 tracker-service/dist/
 tracker-service/seen_ads.json
