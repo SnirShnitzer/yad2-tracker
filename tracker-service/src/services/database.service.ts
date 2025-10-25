@@ -16,6 +16,22 @@ export class DatabaseService {
     }
 
     /**
+     * Test database connection
+     */
+    public async testConnection(): Promise<boolean> {
+        try {
+            const client = await this.pool.connect();
+            await client.query('SELECT 1');
+            client.release();
+            Logger.success('Database connection test successful');
+            return true;
+        } catch (error) {
+            Logger.error('Database connection test failed:', error as Error);
+            return false;
+        }
+    }
+
+    /**
      * Initialize database tables
      */
     public async initializeDatabase(): Promise<void> {

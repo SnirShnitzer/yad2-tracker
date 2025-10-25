@@ -10,8 +10,14 @@ dotenv.config();
 // Main execution function
 async function runTracker(): Promise<void> {
     const tracker = new TrackerService();
-    await tracker.initialize();
-    await tracker.trackListings();
+    
+    try {
+        await tracker.initialize();
+        await tracker.trackListings();
+    } catch (error) {
+        Logger.error('Tracker initialization failed:', error as Error);
+        throw error;
+    }
 }
 
 // Check if running in scheduled mode or one-time mode
@@ -28,6 +34,11 @@ if (isScheduled) {
             await runTracker();
         } catch (error) {
             Logger.error('Error in scheduled run:', error as Error);
+            // If database connection fails, stop the scheduler
+            if (error instanceof Error && error.message.includes('Database connection')) {
+                Logger.error('Stopping scheduler due to database connection failure');
+                process.exit(1);
+            }
         }
     }, {
         timezone: TIMEZONE
@@ -37,6 +48,11 @@ if (isScheduled) {
     Logger.info('Running initial check...');
     runTracker().catch(error => {
         Logger.error('Error in initial run:', error as Error);
+        // If database connection fails, exit immediately
+        if (error instanceof Error && error.message.includes('Database connection')) {
+            Logger.error('Exiting due to database connection failure');
+            process.exit(1);
+        }
     });
     
 } else {

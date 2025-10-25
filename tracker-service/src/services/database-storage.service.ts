@@ -24,6 +24,12 @@ export class DatabaseStorageService {
     public async initialize(): Promise<void> {
         if (this.useDatabase && this.databaseService) {
             try {
+                // Test database connection first
+                const connectionTest = await this.databaseService.testConnection();
+                if (!connectionTest) {
+                    throw new Error('Database connection test failed');
+                }
+
                 await this.databaseService.initializeDatabase();
                 const seenIds = await this.databaseService.getSeenAdIds();
                 this.seenAds = new Set(seenIds);
@@ -82,6 +88,13 @@ export class DatabaseStorageService {
         return {
             seenAdsCount: this.seenAds.size
         };
+    }
+
+    /**
+     * Check if database is available
+     */
+    public isDatabaseAvailable(): boolean {
+        return this.useDatabase && this.databaseService !== null;
     }
 
     /**
