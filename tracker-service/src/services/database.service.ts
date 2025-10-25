@@ -9,11 +9,11 @@ export class DatabaseService {
     private pool: Pool;
 
     constructor() {
-        // Enhanced connection configuration for new Supabase Supavisor
+        // Enhanced connection configuration for Supabase Session Pooler
         const connectionConfig: any = {
             connectionString: process.env.DATABASE_URL,
             ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false,
-            // Connection timeout settings
+            // Connection timeout settings - increased for pooler
             connectionTimeoutMillis: 30000,
             idleTimeoutMillis: 30000,
             // Additional options to help with connectivity
@@ -23,26 +23,61 @@ export class DatabaseService {
             application_name: 'yad2-tracker',
             // Force connection options
             keepAlive: true,
-            keepAliveInitialDelayMillis: 0
+            keepAliveInitialDelayMillis: 0,
+            // Pool configuration
+            max: 10, // Maximum number of clients in the pool
+            min: 0,  // Minimum number of clients in the pool
+            // Allow pool to close idle connections
+            allowExitOnIdle: true
         };
 
-        // Add IPv4-specific settings for GitHub Actions
-        if (process.env.SUPABASE_DB_IPV4_ONLY === 'true') {
-            connectionConfig.host = process.env.DATABASE_URL ? new URL(process.env.DATABASE_URL).hostname : undefined;
-            connectionConfig.port = process.env.DATABASE_URL ? parseInt(new URL(process.env.DATABASE_URL).port) : undefined;
+        // Session pooler specific settings
+        if (process.env.SUPABASE_DB_POOLER === 'true') {
+            // Session pooler uses different connection parameters
+            const url = new URL(process.env.DATABASE_URL || '');
+            connectionConfig.host = url.hostname;
+            connectionConfig.port = parseInt(url.port) || 5432;
+            connectionConfig.database = url.pathname.slice(1);
+            connectionConfig.user = url.username;
+            connectionConfig.password = url.password;
+            
+            // Session pooler specific SSL settings
+            connectionConfig.ssl = { rejectUnauthorized: false };
+            
+            // Remove connectionString when using individual parameters
+            delete connectionConfig.connectionString;
         }
 
         this.pool = new Pool(connectionConfig);
+
+        // Add error handling for pool events
+        this.pool.on('error', (err) => {
+            // Only log critical errors, not expected connection terminations
+            const errorCode = (err as any).code;
+            if (errorCode !== 'ECONNRESET' && errorCode !== 'ENOTFOUND' && 
+                !err.message.includes('shutdown') && 
+                !err.message.includes('termination')) {
+                Logger.error('Database pool error:', err);
+            }
+        });
+
+        this.pool.on('connect', () => {
+            Logger.debug('New database client connected');
+        });
+
+        this.pool.on('remove', () => {
+            Logger.debug('Database client removed from pool');
+        });
     }
 
     /**
      * Test database connection
      */
     public async testConnection(): Promise<boolean> {
+        let client;
         try {
-            const client = await this.pool.connect();
+            client = await this.pool.connect();
             await client.query('SELECT 1');
-            client.release();
             Logger.success('Database connection test successful');
             return true;
         } catch (error) {
@@ -59,12 +94,15 @@ export class DatabaseService {
                         connectionString: process.env.DATABASE_URL,
                         ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false,
                         connectionTimeoutMillis: 20000,
-                        idleTimeoutMillis: 30000
+                        idleTimeoutMillis: 30000,
+                        max: 5,
+                        min: 0,
+                        allowExitOnIdle: true
                     });
                     
-                    const client = await this.pool.connect();
-                    await client.query('SELECT 1');
-                    client.release();
+                    const fallbackClient = await this.pool.connect();
+                    await fallbackClient.query('SELECT 1');
+                    fallbackClient.release();
                     Logger.success('Database connection test successful with fallback method');
                     return true;
                 } catch (fallbackError) {
@@ -74,6 +112,15 @@ export class DatabaseService {
             }
             
             return false;
+        } finally {
+            // Always release the client if it was acquired
+            if (client) {
+                try {
+                    client.release();
+                } catch (releaseError) {
+                    // Ignore release errors
+                }
+            }
         }
     }
 
@@ -295,6 +342,12 @@ export class DatabaseService {
      * Close database connection
      */
     public async close(): Promise<void> {
-        await this.pool.end();
+        try {
+            await this.pool.end();
+            Logger.debug('Database pool closed successfully');
+        } catch (error) {
+            // Ignore errors during shutdown as they're expected
+            Logger.debug('Database pool close completed');
+        }
     }
 }

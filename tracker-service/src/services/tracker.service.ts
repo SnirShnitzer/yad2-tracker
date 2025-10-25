@@ -109,4 +109,16 @@ export class TrackerService {
     public async testEmailConfiguration(): Promise<boolean> {
         return await this.emailService.testEmailConfiguration();
     }
+
+    /**
+     * Close all connections and cleanup resources
+     */
+    public async close(): Promise<void> {
+        try {
+            await this.databaseStorageService.close();
+            Logger.info('Tracker service closed successfully');
+        } catch (error) {
+            Logger.error('Error closing tracker service:', error as Error);
+        }
+    }
 }

@@ -7,6 +7,27 @@ import { CRON_SCHEDULE, TIMEZONE } from './config.js';
 // Load environment variables from .env file
 dotenv.config();
 
+// Graceful shutdown handler
+process.on('SIGINT', async () => {
+    Logger.info('Received SIGINT, shutting down gracefully...');
+    process.exit(0);
+});
+
+process.on('SIGTERM', async () => {
+    Logger.info('Received SIGTERM, shutting down gracefully...');
+    process.exit(0);
+});
+
+process.on('uncaughtException', (error) => {
+    Logger.error('Uncaught Exception:', error);
+    process.exit(1);
+});
+
+process.on('unhandledRejection', (reason) => {
+    Logger.error('Unhandled Rejection:', reason as Error);
+    process.exit(1);
+});
+
 // Validate database connection before starting
 async function validateDatabaseConnection(): Promise<void> {
     if (!process.env.DATABASE_URL) {
@@ -57,6 +78,13 @@ async function runTracker(): Promise<void> {
         }
         
         throw error;
+    } finally {
+        // Ensure database connections are properly closed
+        try {
+            await tracker.close();
+        } catch (closeError) {
+            Logger.warning('Error closing tracker: ' + (closeError as Error).message);
+        }
     }
 }
 

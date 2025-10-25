@@ -22,7 +22,9 @@ export class Logger {
     }
 
     static debug(message: string): void {
-        console.log(`🐛 ${message}`);
+        if (process.env.NODE_ENV === 'development' || process.env.DEBUG === 'true') {
+            console.log(`🐛 ${message}`);
+        }
     }
 
     static start(message: string): void {
