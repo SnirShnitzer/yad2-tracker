@@ -1,10 +1,12 @@
 import { NextResponse } from 'next/server'
-import { clearSessionCookie } from '../../../../lib/auth'
+
+export const dynamic = 'force-dynamic'
 
 export async function POST() {
   try {
-    clearSessionCookie()
-    return NextResponse.json({ success: true })
+    const response = NextResponse.json({ success: true })
+    response.cookies.delete('yad2-admin-session')
+    return response
   } catch (error) {
     console.error('Logout error:', error)
     return NextResponse.json(

@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createSession, setSessionCookie, verifyPassword } from '../../../../lib/auth'
+import { createSession } from '../../../../lib/auth'
 import { env } from '../../../../lib/env'
+
+export const dynamic = 'force-dynamic'
 
 export async function POST(request: NextRequest) {
   try {
@@ -38,9 +40,17 @@ export async function POST(request: NextRequest) {
     
     // Create session
     const sessionToken = createSession()
-    setSessionCookie(sessionToken)
     
-    return NextResponse.json({ success: true })
+    // Set cookie using NextResponse
+    const response = NextResponse.json({ success: true })
+    response.cookies.set('yad2-admin-session', sessionToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      maxAge: 60 * 60 * 24 * 7, // 7 days
+    })
+    
+    return response
   } catch (error) {
     console.error('Login error:', error)
     return NextResponse.json(

@@ -4,6 +4,8 @@ import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useAuth } from '../../lib/useAuth'
+
+export const dynamic = 'force-dynamic'
 import { 
   Home, 
   Link as LinkIcon, 

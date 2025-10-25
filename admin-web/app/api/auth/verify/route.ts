@@ -1,9 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getSessionToken, verifySession } from '../../../../lib/auth'
+import { verifySession } from '../../../../lib/auth'
+
+export const dynamic = 'force-dynamic'
 
 export async function GET(request: NextRequest) {
   try {
-    const sessionToken = getSessionToken()
+    const sessionToken = request.cookies.get('yad2-admin-session')?.value
     
     if (!sessionToken) {
       return NextResponse.json({ authenticated: false }, { status: 401 })
