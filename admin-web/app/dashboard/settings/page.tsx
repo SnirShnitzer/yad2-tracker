@@ -1,8 +1,8 @@
 'use client'
 
 import { useState } from 'react'
-import { SettingsForm } from '@/components/SettingsForm'
-import { TrackerControls } from '@/components/TrackerControls'
+import { SettingsForm } from '../../../components/SettingsForm'
+import { TrackerControls } from '../../../components/TrackerControls'
 
 export default function SettingsPage() {
   return (

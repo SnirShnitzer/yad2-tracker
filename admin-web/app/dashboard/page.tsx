@@ -1,6 +1,6 @@
-import { getAdsStats } from '@/lib/db'
-import { StatsCard } from '@/components/StatsCard'
-import { ActivityFeed } from '@/components/ActivityFeed'
+import { getAdsStats } from '../../lib/db'
+import { StatsCard } from '../../components/StatsCard'
+import { ActivityFeed } from '../../components/ActivityFeed'
 
 export const dynamic = 'force-dynamic'
 

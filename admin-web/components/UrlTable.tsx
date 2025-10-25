@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { Url } from '@/lib/db'
+import { Url } from '../lib/db'
 import { Edit, Trash2, Power, PowerOff } from 'lucide-react'
 import { UrlForm } from './UrlForm'
 

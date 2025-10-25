@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { updateUrl, deleteUrl } from '@/lib/db'
+import { updateUrl, deleteUrl } from '../../../../lib/db'
 
 export async function PUT(
   request: NextRequest,

@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { useAuth } from '@/lib/useAuth'
+import { useAuth } from '../../lib/useAuth'
 import { 
   Home, 
   Link as LinkIcon, 

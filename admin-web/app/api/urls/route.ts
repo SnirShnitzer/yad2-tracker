@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getAllUrls, addUrl } from '@/lib/db'
+import { getAllUrls, addUrl } from '../../../lib/db'
 
 export async function GET() {
   try {

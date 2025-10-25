@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getSessionToken, verifySession } from '@/lib/auth'
+import { getSessionToken, verifySession } from '../../../../lib/auth'
 
 export async function GET(request: NextRequest) {
   try {

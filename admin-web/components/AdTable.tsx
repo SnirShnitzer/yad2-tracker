@@ -1,4 +1,4 @@
-import { Ad } from '@/lib/db'
+import { Ad } from '../lib/db'
 import { ExternalLink, Calendar } from 'lucide-react'
 
 interface AdTableProps {

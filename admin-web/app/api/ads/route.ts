@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getAds, getAdsCount } from '@/lib/db'
+import { getAds, getAdsCount } from '../../../lib/db'
 
 // Force dynamic rendering for this route
 export const dynamic = 'force-dynamic'

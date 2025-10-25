@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { Url } from '@/lib/db'
+import { Url } from '../lib/db'
 import { X } from 'lucide-react'
 
 interface UrlFormProps {

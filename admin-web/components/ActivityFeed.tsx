@@ -1,4 +1,4 @@
-import { getAds } from '@/lib/db'
+import { getAds } from '../lib/db'
 import { Clock, ExternalLink } from 'lucide-react'
 
 export async function ActivityFeed() {

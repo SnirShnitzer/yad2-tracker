@@ -1,10 +1,10 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { UrlTable } from '@/components/UrlTable'
-import { UrlForm } from '@/components/UrlForm'
+import { UrlTable } from '../../../components/UrlTable'
+import { UrlForm } from '../../../components/UrlForm'
 import { Plus } from 'lucide-react'
-import { Url } from '@/lib/db'
+import { Url } from '../../../lib/db'
 
 export default function UrlsPage() {
   const [urls, setUrls] = useState<Url[]>([])

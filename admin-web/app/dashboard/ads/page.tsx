@@ -1,6 +1,6 @@
-import { getAds, getAdsCount } from '@/lib/db'
-import { AdTable } from '@/components/AdTable'
-import { SearchBar } from '@/components/SearchBar'
+import { getAds, getAdsCount } from '../../../lib/db'
+import { AdTable } from '../../../components/AdTable'
+import { SearchBar } from '../../../components/SearchBar'
 
 export const dynamic = 'force-dynamic'
 
