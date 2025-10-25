@@ -3,7 +3,7 @@ name: Yad2 Tracker
 on:
   # Run every hour
   schedule:
-    - cron: '0 */3 * * *'
+    - cron: '0 * * * *'
   
   # Allow manual triggering
   workflow_dispatch:
@@ -27,7 +27,15 @@ jobs:
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
+      with:
+        fetch-depth: 0  # Fetch all history to ensure we have the latest code
       
+    - name: Verify latest code
+      run: |
+        echo "📋 Current commit: $(git rev-parse HEAD)"
+        echo "📅 Last commit date: $(git log -1 --format=%cd)"
+        echo "📝 Last commit message: $(git log -1 --format=%s)"
+        
     - name: Setup Node.js
       uses: actions/setup-node@v4
       with:
