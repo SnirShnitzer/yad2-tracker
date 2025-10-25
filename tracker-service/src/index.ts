@@ -18,17 +18,16 @@ async function validateDatabaseConnection(): Promise<void> {
     }
 
     try {
-        const { Pool } = await import('pg');
-        const pool = new Pool({
-            connectionString: process.env.DATABASE_URL,
-            ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false
-        });
-
-        const client = await pool.connect();
-        await client.query('SELECT 1');
-        client.release();
-        await pool.end();
+        // Use the same DatabaseService for consistency
+        const { DatabaseService } = await import('./services/database.service.js');
+        const dbService = new DatabaseService();
         
+        const isConnected = await dbService.testConnection();
+        if (!isConnected) {
+            throw new Error('Database connection test failed');
+        }
+        
+        await dbService.close();
         Logger.success('Database connection validated successfully');
     } catch (error) {
         Logger.error('Database connection validation failed:', error as Error);
