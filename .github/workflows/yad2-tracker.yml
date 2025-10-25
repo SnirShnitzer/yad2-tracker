@@ -55,6 +55,17 @@ jobs:
         cd tracker-service
         npm run build
       
+    - name: Test Database Connection
+      env:
+        DATABASE_URL: ${{ secrets.DATABASE_URL }}
+        NODE_OPTIONS: --no-experimental-fetch --dns-result-order=ipv4first
+        PGSSLMODE: require
+        PGCONNECT_TIMEOUT: 30
+      run: |
+        cd tracker-service
+        echo "🔍 Testing database connection..."
+        node test-db-connection.js
+      
     - name: Run Yad2 Tracker
       env:
         GMAIL_USER: ${{ secrets.GMAIL_USER }}
