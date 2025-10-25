@@ -12,10 +12,46 @@ if (!env.DATABASE_URL) {
   throw new Error('DATABASE_URL environment variable is required')
 }
 
-const pool = new Pool({
+// Enhanced connection configuration for Supabase Session Pooler
+const connectionConfig: any = {
   connectionString: env.DATABASE_URL,
-  ssl: env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false
-})
+  ssl: env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false,
+  // Connection timeout settings - increased for pooler
+  connectionTimeoutMillis: 30000,
+  idleTimeoutMillis: 30000,
+  // Additional options to help with connectivity
+  statement_timeout: 20000,
+  query_timeout: 20000,
+  // Application name for identification
+  application_name: 'yad2-tracker-admin',
+  // Force connection options
+  keepAlive: true,
+  keepAliveInitialDelayMillis: 0,
+  // Pool configuration
+  max: 10, // Maximum number of clients in the pool
+  min: 0,  // Minimum number of clients in the pool
+  // Allow pool to close idle connections
+  allowExitOnIdle: true
+}
+
+// Session pooler specific settings
+if (process.env.SUPABASE_DB_POOLER === 'true') {
+  // Session pooler uses different connection parameters
+  const url = new URL(env.DATABASE_URL || '');
+  connectionConfig.host = url.hostname;
+  connectionConfig.port = parseInt(url.port) || 5432;
+  connectionConfig.database = url.pathname.slice(1);
+  connectionConfig.user = url.username;
+  connectionConfig.password = url.password;
+  
+  // Session pooler specific SSL settings
+  connectionConfig.ssl = { rejectUnauthorized: false };
+  
+  // Remove connectionString when using individual parameters
+  delete connectionConfig.connectionString;
+}
+
+const pool = new Pool(connectionConfig)
 
 // Test database connection
 pool.on('connect', () => {
@@ -23,7 +59,13 @@ pool.on('connect', () => {
 })
 
 pool.on('error', (err) => {
-  console.error('Database connection error:', err)
+  // Only log critical errors, not expected connection terminations
+  const errorCode = (err as any).code;
+  if (errorCode !== 'ECONNRESET' && errorCode !== 'ENOTFOUND' && 
+      !err.message.includes('shutdown') && 
+      !err.message.includes('termination')) {
+    console.error('Database connection error:', err)
+  }
 })
 
 // Types
