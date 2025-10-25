@@ -65,6 +65,9 @@ jobs:
         TEST_MODE: ${{ github.event.inputs.test_mode || 'false' }}
         # Force IPv4 to avoid GitHub Actions IPv6 connectivity issues
         NODE_OPTIONS: --no-experimental-fetch --dns-result-order=ipv4first
+        # Additional environment variables to help with connectivity
+        PGSSLMODE: require
+        PGCONNECT_TIMEOUT: 30
       run: |
         cd tracker-service
         if [ "$TEST_MODE" = "true" ]; then
