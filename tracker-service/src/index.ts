@@ -27,8 +27,10 @@ async function validateDatabaseConnection(): Promise<void> {
         const { promisify } = await import('util');
         const lookup = promisify(dns.lookup);
         
+        let resolvedHostname = hostname;
         try {
             const result = await lookup(hostname, { family: 4 });
+            resolvedHostname = result.address;
             Logger.info(`Resolved ${hostname} to IPv4: ${result.address}`);
         } catch (dnsError) {
             Logger.warning(`Could not resolve ${hostname} to IPv4, proceeding with hostname`);

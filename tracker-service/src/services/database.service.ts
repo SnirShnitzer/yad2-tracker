@@ -24,14 +24,16 @@ export class DatabaseService {
             password: url.password,
             ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false,
             // Connection timeout settings
-            connectionTimeoutMillis: 15000, // Increased timeout
+            connectionTimeoutMillis: 20000, // Increased timeout for GitHub Actions
             idleTimeoutMillis: 30000,
             // Force IPv4 by using hostname resolution
             keepAlive: true,
             keepAliveInitialDelayMillis: 0,
             // Additional options to help with connectivity
-            statement_timeout: 10000,
-            query_timeout: 10000
+            statement_timeout: 15000,
+            query_timeout: 15000,
+            // Force IPv4 resolution
+            application_name: 'yad2-tracker'
         });
     }
 
@@ -47,6 +49,32 @@ export class DatabaseService {
             return true;
         } catch (error) {
             Logger.error('Database connection test failed:', error as Error);
+            
+            // If individual parameters fail, try connectionString approach
+            if (error instanceof Error && error.message.includes('ENETUNREACH')) {
+                Logger.info('Trying fallback connection method...');
+                try {
+                    await this.pool.end(); // Close the current pool
+                    
+                    // Create a new pool with connectionString
+                    this.pool = new Pool({
+                        connectionString: process.env.DATABASE_URL,
+                        ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false,
+                        connectionTimeoutMillis: 20000,
+                        idleTimeoutMillis: 30000
+                    });
+                    
+                    const client = await this.pool.connect();
+                    await client.query('SELECT 1');
+                    client.release();
+                    Logger.success('Database connection test successful with fallback method');
+                    return true;
+                } catch (fallbackError) {
+                    Logger.error('Fallback connection also failed:', fallbackError as Error);
+                    return false;
+                }
+            }
+            
             return false;
         }
     }
