@@ -1,9 +1,20 @@
 import { Pool } from 'pg'
+import { env } from './env'
 
 // Database connection
+console.log('Database connection debug:', {
+  DATABASE_URL: process.env.DATABASE_URL ? 'SET' : 'NOT SET',
+  ENV_DATABASE_URL: env.DATABASE_URL ? 'SET' : 'NOT SET',
+  NODE_ENV: env.NODE_ENV
+})
+
+if (!env.DATABASE_URL) {
+  throw new Error('DATABASE_URL environment variable is required')
+}
+
 const pool = new Pool({
-  connectionString: process.env.DATABASE_URL,
-  ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false
+  connectionString: env.DATABASE_URL,
+  ssl: env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false
 })
 
 // Types

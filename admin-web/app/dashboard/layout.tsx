@@ -1,8 +1,9 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
+import { useAuth } from '@/lib/useAuth'
 import { 
   Home, 
   Link as LinkIcon, 
@@ -29,14 +30,33 @@ export default function DashboardLayout({
 }) {
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const router = useRouter()
+  const { isAuthenticated, loading, logout } = useAuth()
+
+  useEffect(() => {
+    if (!loading && !isAuthenticated) {
+      router.push('/login')
+    }
+  }, [isAuthenticated, loading, router])
 
   const handleLogout = async () => {
-    try {
-      await fetch('/api/auth/logout', { method: 'POST' })
-      router.push('/login')
-    } catch (error) {
-      console.error('Logout error:', error)
-    }
+    await logout()
+  }
+
+  // Show loading while checking authentication
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
+          <p className="mt-4 text-gray-600">Loading...</p>
+        </div>
+      </div>
+    )
+  }
+
+  // Don't render if not authenticated (will redirect)
+  if (!isAuthenticated) {
+    return null
   }
 
   return (

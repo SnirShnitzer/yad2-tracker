@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createSession, setSessionCookie, verifyPassword } from '@/lib/auth'
+import { env } from '@/lib/env'
 
 export async function POST(request: NextRequest) {
   try {
@@ -12,7 +13,13 @@ export async function POST(request: NextRequest) {
       )
     }
     
-    const adminPassword = process.env.ADMIN_PASSWORD
+    const adminPassword = env.ADMIN_PASSWORD
+    console.log('Environment check:', {
+      NODE_ENV: env.NODE_ENV,
+      ADMIN_PASSWORD: adminPassword ? 'SET' : 'NOT SET',
+      DATABASE_URL: env.DATABASE_URL ? 'SET' : 'NOT SET'
+    })
+    
     if (!adminPassword) {
       return NextResponse.json(
         { error: 'Admin password not configured' },
