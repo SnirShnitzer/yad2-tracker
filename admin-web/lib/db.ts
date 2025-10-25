@@ -4,8 +4,8 @@ import { env } from './env'
 // Database connection
 console.log('Database connection debug:', {
   DATABASE_URL: process.env.DATABASE_URL ? 'SET' : 'NOT SET',
-  ENV_DATABASE_URL: env.DATABASE_URL ? 'SET' : 'NOT SET',
-  NODE_ENV: env.NODE_ENV
+  NODE_ENV: env.NODE_ENV,
+  URL_PREVIEW: env.DATABASE_URL ? env.DATABASE_URL.substring(0, 30) + '...' : 'NOT SET'
 })
 
 if (!env.DATABASE_URL) {
@@ -15,6 +15,15 @@ if (!env.DATABASE_URL) {
 const pool = new Pool({
   connectionString: env.DATABASE_URL,
   ssl: env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false
+})
+
+// Test database connection
+pool.on('connect', () => {
+  console.log('Database connected successfully')
+})
+
+pool.on('error', (err) => {
+  console.error('Database connection error:', err)
 })
 
 // Types

@@ -11,18 +11,6 @@ export function useAuth() {
   useEffect(() => {
     const checkAuth = async () => {
       try {
-        // Check if session cookie exists
-        const sessionToken = document.cookie
-          .split('; ')
-          .find(row => row.startsWith('yad2-admin-session='))
-          ?.split('=')[1]
-
-        if (!sessionToken) {
-          setIsAuthenticated(false)
-          setLoading(false)
-          return
-        }
-
         // Verify session with server
         const response = await fetch('/api/auth/verify', {
           method: 'GET',
@@ -33,8 +21,6 @@ export function useAuth() {
           setIsAuthenticated(true)
         } else {
           setIsAuthenticated(false)
-          // Clear invalid session
-          document.cookie = 'yad2-admin-session=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;'
         }
       } catch (error) {
         console.error('Auth check failed:', error)
