@@ -9,12 +9,12 @@ export class DatabaseService {
     private pool: Pool;
 
     constructor() {
-        // For GitHub Actions, use connectionString with specific options to avoid IPv6 issues
-        this.pool = new Pool({
+        // Enhanced connection configuration for new Supabase Supavisor
+        const connectionConfig: any = {
             connectionString: process.env.DATABASE_URL,
             ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false,
             // Connection timeout settings
-            connectionTimeoutMillis: 30000, // Increased timeout for GitHub Actions
+            connectionTimeoutMillis: 30000,
             idleTimeoutMillis: 30000,
             // Additional options to help with connectivity
             statement_timeout: 20000,
@@ -24,7 +24,15 @@ export class DatabaseService {
             // Force connection options
             keepAlive: true,
             keepAliveInitialDelayMillis: 0
-        });
+        };
+
+        // Add IPv4-specific settings for GitHub Actions
+        if (process.env.SUPABASE_DB_IPV4_ONLY === 'true') {
+            connectionConfig.host = process.env.DATABASE_URL ? new URL(process.env.DATABASE_URL).hostname : undefined;
+            connectionConfig.port = process.env.DATABASE_URL ? parseInt(new URL(process.env.DATABASE_URL).port) : undefined;
+        }
+
+        this.pool = new Pool(connectionConfig);
     }
 
     /**

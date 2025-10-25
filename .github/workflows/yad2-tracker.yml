@@ -64,7 +64,24 @@ jobs:
       run: |
         cd tracker-service
         echo "🔍 Testing database connection..."
-        node test-db-connection.js
+        node -e "
+        import { Pool } from 'pg';
+        const pool = new Pool({
+          connectionString: process.env.DATABASE_URL,
+          ssl: { rejectUnauthorized: false },
+          connectionTimeoutMillis: 30000
+        });
+        try {
+          const client = await pool.connect();
+          await client.query('SELECT 1');
+          client.release();
+          await pool.end();
+          console.log('✅ Database connection successful');
+        } catch (error) {
+          console.error('❌ Database connection failed:', error.message);
+          process.exit(1);
+        }
+        "
       
     - name: Run Yad2 Tracker
       env:
@@ -79,8 +96,17 @@ jobs:
         # Additional environment variables to help with connectivity
         PGSSLMODE: require
         PGCONNECT_TIMEOUT: 30
+        # Supabase connection settings for IPv4 compatibility
+        SUPABASE_DB_POOLER: true
+        SUPABASE_DB_IPV4_ONLY: true
       run: |
         cd tracker-service
+        echo "🔧 Environment check:"
+        echo "  - DATABASE_URL: ${DATABASE_URL:0:30}..."
+        echo "  - NODE_OPTIONS: $NODE_OPTIONS"
+        echo "  - PGSSLMODE: $PGSSLMODE"
+        echo "  - SUPABASE_DB_POOLER: $SUPABASE_DB_POOLER"
+        echo ""
         if [ "$TEST_MODE" = "true" ]; then
           echo "🧪 Running in test mode - no emails will be sent"
           node dist/index.js
