@@ -3,7 +3,7 @@ name: Yad2 Tracker
 on:
   # Run every hour
   schedule:
-    - cron: '0 * * * *'
+    - cron: '0 */3 * * *'
   
   # Allow manual triggering
   workflow_dispatch:
