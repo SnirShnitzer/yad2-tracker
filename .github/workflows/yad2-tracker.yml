@@ -1,11 +1,11 @@
 name: Yad2 Tracker
 
 on:
-  # Run every hour
-  schedule:
-    - cron: '0 * * * *'
+  # DISABLED: Run every hour
+  # schedule:
+  #   - cron: '0 * * * *'
   
-  # Allow manual triggering
+  # Allow manual triggering (still available if needed)
   workflow_dispatch:
     inputs:
       test_mode:
@@ -14,11 +14,11 @@ on:
         default: 'false'
         type: boolean
 
-  # Run on push to main branch (for testing)
-  push:
-    branches: [ main, master ]
-    paths-ignore:
-      - 'admin-web/**'
+  # DISABLED: Run on push to main branch (for testing)
+  # push:
+  #   branches: [ main, master ]
+  #   paths-ignore:
+  #     - 'admin-web/**'
 
 jobs:
   track-listings:
