@@ -1,17 +1,17 @@
 name: Yad2 Tracker
 
 on:
-  # DISABLED: Run every hour
-  # schedule:
-  #   - cron: '0 * * * *'
+  # Run every hour
+  schedule:
+    - cron: '0 * * * *'
   
-  # Allow manual triggering (still available if needed)
+  # Allow manual triggering
   workflow_dispatch:
     inputs:
       test_mode:
         description: 'Run in test mode (no emails)'
         required: false
-        default: 'false'
+        default: false
         type: boolean
 
   # DISABLED: Run on push to main branch (for testing)
