@@ -98,6 +98,7 @@ jobs:
         GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
         DATABASE_URL: ${{ secrets.DATABASE_URL }}
         SEND_EMAILS: ${{ secrets.SEND_EMAILS || 'true' }}
+        EMAIL_RECIPIENTS: ${{ secrets.EMAIL_RECIPIENTS }}
         NODE_ENV: production
         TEST_MODE: ${{ github.event.inputs.test_mode || 'false' }}
         # Force IPv4 to avoid GitHub Actions IPv6 connectivity issues
@@ -112,6 +113,7 @@ jobs:
         cd tracker-service
         echo "🔧 Environment check:"
         echo "  - DATABASE_URL: ${DATABASE_URL:0:30}..."
+        echo "  - EMAIL_RECIPIENTS: ${EMAIL_RECIPIENTS:+configured}"
         echo "  - NODE_OPTIONS: $NODE_OPTIONS"
         echo "  - PGSSLMODE: $PGSSLMODE"
         echo "  - SUPABASE_DB_POOLER: $SUPABASE_DB_POOLER"
