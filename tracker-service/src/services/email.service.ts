@@ -64,7 +64,7 @@ export class EmailService {
 
             return {
                 sendEmails: settings.send_emails === 'true',
-                recipients: settings.email_recipients || process.env.GMAIL_USER || ''
+                recipients: settings.email_recipients || process.env.EMAIL_RECIPIENTS || process.env.GMAIL_USER || ''
             };
         } catch (error) {
             Logger.warning('Failed to get email settings from database, using environment variables');

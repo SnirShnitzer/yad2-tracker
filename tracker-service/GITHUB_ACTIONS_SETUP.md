@@ -53,12 +53,18 @@ Add these secrets:
 - **Name**: `GMAIL_APP_PASSWORD`
 - **Value**: `your-16-character-app-password`
 
-#### Secret 3: DATABASE_URL (Optional)
+#### Secret 3: EMAIL_RECIPIENTS
+- **Name**: `EMAIL_RECIPIENTS`
+- **Value**: `recipient1@gmail.com, recipient2@gmail.com`
+- **Description**: Comma-separated list of email addresses to receive notifications
+- **Note**: If not set, emails will be sent to `GMAIL_USER` address
+
+#### Secret 4: DATABASE_URL (Optional)
 - **Name**: `DATABASE_URL`
 - **Value**: `postgresql://user:pass@host:port/db`
 - **Description**: For shared database storage (see DATABASE_SETUP.md)
 
-#### Secret 4: SEND_EMAILS (Optional)
+#### Secret 5: SEND_EMAILS (Optional)
 - **Name**: `SEND_EMAILS`
 - **Value**: `true` or `false`
 - **Description**: Enable/disable email notifications
@@ -175,7 +181,7 @@ The workflow runs in UTC. To change timezone, add to the workflow:
 
 1. **"Secrets not found"**
    - Check secrets are set correctly in repository settings
-   - Ensure secret names match exactly: `GMAIL_USER`, `GMAIL_APP_PASSWORD`
+   - Ensure secret names match exactly: `GMAIL_USER`, `GMAIL_APP_PASSWORD`, `EMAIL_RECIPIENTS`
 
 2. **"Email configuration missing"**
    - Verify Gmail App Password is correct

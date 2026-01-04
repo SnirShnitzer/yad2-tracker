@@ -96,6 +96,7 @@ jobs:
       env:
         GMAIL_USER: ${{ secrets.GMAIL_USER }}
         GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
+        EMAIL_RECIPIENTS: ${{ secrets.EMAIL_RECIPIENTS }}
         DATABASE_URL: ${{ secrets.DATABASE_URL }}
         SEND_EMAILS: ${{ secrets.SEND_EMAILS || 'true' }}
         NODE_ENV: production
